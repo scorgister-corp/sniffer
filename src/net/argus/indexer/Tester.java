@@ -8,9 +8,12 @@ import java.util.List;
 
 public class Tester implements Runnable {
 	
+	private static int n;
+	
 	private List<String> ips;
 	
 	public Tester(List<String> ips) {
+		n++;
 		this.ips = ips;
 	}
 	
@@ -22,18 +25,22 @@ public class Tester implements Runnable {
 					System.out.println(InetAddress.getByName(ip).getHostName());
 			}catch(IOException e) {}
 		}
+		n--;
 	}
 	
-	public static void start(List<String> ips, int maxByThread) {
-		int off = 0;
+	public static void start(List<String> ips, int maxByThread, int nMax) throws InterruptedException {
 		List<String> tmp = new ArrayList<String>();
 		for(int i = 0; i < ips.size(); i++) {
 			tmp.add(ips.get(i));
 			if(i % maxByThread == 0) {
+				while(n >= nMax)
+					Thread.sleep(1000);
+				
 				new Thread(new Tester(new ArrayList<String>(tmp))).start();
 				tmp.clear();
 			}
 		}
+		
 		new Thread(new Tester(new ArrayList<String>(tmp))).start();
 
 	}

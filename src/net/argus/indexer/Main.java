@@ -11,11 +11,16 @@ import java.util.List;
 
 public class Main {
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		boolean list = true;
 		boolean index = false;
 		
-		String inter = "lo";
+		boolean Mt = false;
+		boolean Ms = false;
+		
+		String inter = "eth0";
+		int nMax = 25;
+		int maxByThread = 15;
 		
 		for(int i = 0; i < args.length; i++) {
 			String str = args[i];
@@ -31,7 +36,25 @@ public class Main {
 				
 				inter = args[i+1];
 			}
+			
+			if(str.toLowerCase().equals("-Mt") || str.toLowerCase().equals("--max-thread")) {
+				nMax = Integer.valueOf(args[i+1]);
+				Mt = true;
+			}
+			
+			if(str.toLowerCase().equals("-Ms") || str.toLowerCase().equals("--max-sniff")) {
+				maxByThread = Integer.valueOf(args[i+1]);
+				Ms = true;
+			}
+			
 		}
+		
+		if(index && !Mt)
+			System.out.println("You can use -Mt or --max-thread to configure the maximum number of concurrent tests (default: " + nMax + ")");
+		
+		if(index && !Ms)
+			System.out.println("You can use -Ms or --max-sniff to configure the maximum number of ip tester per thread (default: " + maxByThread + ")");
+
 		
 		if(list) {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -65,7 +88,7 @@ public class Main {
 				
 				System.out.println("Starting sniff on " + net.getName() + ": " + Tester.getNetworkIP(ia.getAddress().getHostAddress(), ia.getNetworkPrefixLength()) + "/" + ia.getNetworkPrefixLength());
 				List<String> ips = Tester.getIps(ia.getAddress().getHostAddress(), ia.getNetworkPrefixLength());
-				Tester.start(ips, 16);
+				Tester.start(ips, maxByThread, nMax);
 			}
 		}
 
