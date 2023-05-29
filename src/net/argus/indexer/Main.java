@@ -18,6 +18,8 @@ public class Main {
 		boolean Mt = false;
 		boolean Ms = false;
 		
+		boolean noInfo = false;
+		
 		String inter = "eth0";
 		int nMax = 25;
 		int maxByThread = 15;
@@ -37,22 +39,24 @@ public class Main {
 				inter = args[i+1];
 			}
 			
-			if(str.toLowerCase().equals("-Mt") || str.toLowerCase().equals("--max-thread")) {
+			if(str.equals("-Mt") || str.toLowerCase().equals("--max-thread")) {
 				nMax = Integer.valueOf(args[i+1]);
 				Mt = true;
 			}
 			
-			if(str.toLowerCase().equals("-Ms") || str.toLowerCase().equals("--max-sniff")) {
+			if(str.equals("-Ms") || str.toLowerCase().equals("--max-sniff")) {
 				maxByThread = Integer.valueOf(args[i+1]);
 				Ms = true;
 			}
 			
+			if(str.equals("-Ni") || str.toLowerCase().equals("--no-infos"))
+				noInfo = true;
+			
 		}
-		
-		if(index && !Mt)
+		if(index && !Mt && !noInfo)
 			System.out.println("You can use -Mt or --max-thread to configure the maximum number of concurrent tests (default: " + nMax + ")");
 		
-		if(index && !Ms)
+		if(index && !Ms && !noInfo)
 			System.out.println("You can use -Ms or --max-sniff to configure the maximum number of ip tester per thread (default: " + maxByThread + ")");
 
 		
@@ -86,7 +90,9 @@ public class Main {
 				if(ia.getAddress() instanceof Inet6Address)
 					continue;
 				
-				System.out.println("Starting sniff on " + net.getName() + ": " + Tester.getNetworkIP(ia.getAddress().getHostAddress(), ia.getNetworkPrefixLength()) + "/" + ia.getNetworkPrefixLength());
+				if(!noInfo)
+					System.out.println("Starting sniff on " + net.getName() + ": " + Tester.getNetworkIP(ia.getAddress().getHostAddress(), ia.getNetworkPrefixLength()) + "/" + ia.getNetworkPrefixLength());
+				
 				List<String> ips = Tester.getIps(ia.getAddress().getHostAddress(), ia.getNetworkPrefixLength());
 				Tester.start(ips, maxByThread, nMax);
 			}
